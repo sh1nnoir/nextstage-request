@@ -158,7 +158,8 @@
         <label class="f">วันรื้อถอน <span class="req">*</span>
           <div class="pair"><input type="date" name="teardownDate"><input type="time" name="teardownTime" value="22:30"></div>
         </label>
-        <p class="hint full" id="autoExtra" style="margin:0"></p>
+        <label class="check full" style="color:var(--ink)"><input type="checkbox" name="extraMorningSetup">
+          <span>กรุณาติ๊ก กรณีต้องการ Set up เพิ่มเติม เช้าวันถัดไป ตั้งแต่เวลา 06.00 น. <span id="morningDate"></span></span></label>
         <label class="f">ส่งมอบพื้นที่ <span class="req">*</span>
           <div class="pair"><input type="date" name="handoverDate"><input type="time" name="handoverTime"></div>
           <span class="check"><input type="checkbox" id="sameHandover" checked> วันเดียวกับวัน Set up</span>
@@ -195,8 +196,8 @@
       <p class="hint">ติ๊กเฉพาะรายการที่ต้องการ</p>
       <div class="checks">
         <label><input type="checkbox" name="trashBin"> <span>ขอถังขยะในพื้นที่จัดกิจกรรม</span></label>
-        <label><input type="checkbox" name="stairCushions"> <span>ขอเก็บเบาะทั้งหมดบนขั้นบันได</span></label>
-        <label><input type="checkbox" name="stairTables"> <span>ขอเก็บโต๊ะเหล็กบนขั้นบันไดทั้งหมด</span></label>
+        <label><input type="checkbox" name="stairCushions"> <span>ขอเก็บเบาะบริเวณขั้นบันไดที่นั่ง ของพื้นที่ SCBX Next Stage</span></label>
+        <label><input type="checkbox" name="stairTables"> <span>ขอเก็บโต๊ะเหล็กบริเวณขั้นบันไดที่นั่ง ของพื้นที่ SCBX Next Stage</span></label>
         <label><input type="checkbox" name="parking" checked> <span>ขอสแกนบัตรจอดรถให้ทีมผู้จัดงาน <span id="parkingHoursText"></span>
           <small>สำหรับคืนติดตั้งและคืนรื้อถอนงาน</small></span></label>
         <label><input type="checkbox" name="lightsSetup" checked> <span>ขอเปิดไฟแสงสว่างช่วงติดตั้งงาน
@@ -249,8 +250,7 @@
     <div class="grid">
       <label class="f span2">อุปกรณ์<select data-k="itemChoice" class="itemChoice"></select>
         <input data-k="itemOther" class="itemOther hidden"></label>
-      <label class="f">จำนวน<input type="number" min="1" data-k="qty"></label>
-      <label class="f">หน่วย<input data-k="unit" value="ตัว"></label>
+      <label class="f span2">จำนวน<input type="number" min="1" data-k="qty"></label>
       <label class="f span2">สถานที่ส่ง<select data-k="placeChoice" class="placeChoice"></select>
         <input data-k="placeOther" class="placeOther hidden" placeholder="ระบุสถานที่ส่ง"></label>
       <label class="f">ส่งวันที่<input type="date" data-k="sendDate"></label>
@@ -370,7 +370,7 @@ function startForm(BOOT) {
     });
   }
   function equipDefaults() {
-    return { place: BOOT.equipmentPlaces[0], unit: 'ตัว',
+    return { place: BOOT.equipmentPlaces[0],
       sendDate: f('setupDate').value, sendTime: f('setupTime').value,
       pickDate: f('teardownDate').value, pickTime: f('teardownTime').value };
   }
@@ -388,10 +388,12 @@ function startForm(BOOT) {
   function radioVal(name) { var r = $('input[name="' + name + '"]:checked'); return r ? r.value : ''; }
   function setRadio(name, v) { var r = $('input[name="' + name + '"][value="' + v + '"]'); if (r) r.checked = true; }
   function syncAutoExtra() {
-    var t = f('setupTime').value, d = f('setupDate').value;
-    $('#autoExtra').textContent = t && t >= '22:00'
-      ? 'เข้า Set up ตั้งแต่ 22.00 น. — ระบบลง “วัน Set up เพิ่มเติม” เช้าวันถัดไป เวลา 06.00 น. ให้อัตโนมัติ'
-      : '';
+    var d = f('setupDate').value, label = '';
+    if (d) {
+      var t = new Date(d + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + 1);
+      label = '(วันที่ ' + t.getUTCDate() + '/' + (t.getUTCMonth() + 1) + '/' + (t.getUTCFullYear() + 543) + ')';
+    }
+    $('#morningDate').textContent = label;
   }
   function syncLinked() {
     syncAutoExtra();
@@ -434,7 +436,7 @@ function startForm(BOOT) {
       signers: readRows('signers'),
       coordinatorName: f('coordinatorName').value, coordinatorPhone: f('coordinatorPhone').value,
       equipment: readRows('equipment'), equipmentNotes: f('equipmentNotes').value, note: f('note').value,
-      trashBin: f('trashBin').checked, stairCushions: f('stairCushions').checked, stairTables: f('stairTables').checked,
+      extraMorningSetup: f('extraMorningSetup').checked, trashBin: f('trashBin').checked, stairCushions: f('stairCushions').checked, stairTables: f('stairTables').checked,
       parking: f('parking').checked,
       lightsSetup: f('lightsSetup').checked, lightsTeardown: f('lightsTeardown').checked
     };
@@ -448,7 +450,7 @@ function startForm(BOOT) {
     setRadio('depositStatus', d.depositStatus);
     setRadio('organizerType', d.organizerType);
     setRadio('payerType', d.payerType);
-    ['trashBin', 'stairCushions', 'stairTables', 'parking', 'lightsSetup', 'lightsTeardown'].forEach(function (k) { if (k in d) f(k).checked = !!d[k]; });
+    ['extraMorningSetup', 'trashBin', 'stairCushions', 'stairTables', 'parking', 'lightsSetup', 'lightsTeardown'].forEach(function (k) { if (k in d) f(k).checked = !!d[k]; });
     if (d.venue) {
       if (BOOT.venues.indexOf(d.venue) >= 0) f('venueChoice').value = d.venue;
       else { f('venueChoice').value = '__other'; f('venueOther').value = d.venue; }
