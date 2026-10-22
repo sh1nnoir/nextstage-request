@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แจ้งจัดงาน SCBX NEXT STAGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f8; --card: #ffffff; --ink: #1d1b24; --muted: #6b6878; --line: #e3e0ea;
+    --accent: #4b2c82; --accent-soft: #efeaf8; --danger: #b3261e; --danger-soft: #fdecea;
+    --warn: #8a5a00; --warn-soft: #fff4dc; --ok: #1e6b3a; --ok-soft: #e6f4ea; --field: #fbfaFD;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141218; --card: #1e1b24; --ink: #ece9f2; --muted: #a39fae; --line: #34303d;
+      --accent: #b9a2ec; --accent-soft: #2b2440; --danger: #f2b8b5; --danger-soft: #3b1f1d;
+      --warn: #f0c46a; --warn-soft: #3a2f16; --ok: #8fd6a4; --ok-soft: #1b3324; --field: #18161d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.6 "IBM Plex Sans Thai", system-ui, sans-serif; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 24px 16px 96px; }
+  header.top h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  header.top p { margin: 0; color: var(--muted); }
+  .steps { display: flex; gap: 8px; margin: 20px 0; flex-wrap: wrap; }
+  .steps span { padding: 4px 12px; border-radius: 999px; background: var(--card); border: 1px solid var(--line);
+    color: var(--muted); font-size: .875rem; }
+  .steps span.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  @media (prefers-color-scheme: dark) { .steps span.on { color: #1d1b24; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin: 0 0 16px; }
+  .card h2 { font-size: 1.1rem; margin: 0 0 4px; }
+  .card .hint { color: var(--muted); font-size: .875rem; margin: 0 0 14px; }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+  .grid .full { grid-column: 1 / -1; }
+  @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
+  label.f { display: block; font-size: .875rem; font-weight: 500; }
+  label.f .req { color: var(--danger); }
+  input, select, textarea { width: 100%; margin-top: 4px; padding: 10px 12px; font: inherit; color: var(--ink);
+    background: var(--field); border: 1px solid var(--line); border-radius: 10px; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+  textarea { min-height: 72px; resize: vertical; }
+  .pair { display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; }
+  .radios { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .radios label { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--line);
+    border-radius: 10px; cursor: pointer; font-size: .9rem; }
+  .radios input { width: auto; margin: 0; }
+  .check { display: flex; gap: 8px; align-items: center; font-size: .875rem; color: var(--muted); margin-top: 6px; }
+  .check input { width: auto; margin: 0; }
+  .item { border: 1px dashed var(--line); border-radius: 12px; padding: 12px; margin: 0 0 10px; position: relative; }
+  .item .rm { position: absolute; top: 8px; right: 8px; }
+  .item .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  @media (max-width: 620px) { .item .grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 10px; }
+    .item input, .item select { padding: 8px 8px; } }
+  .item .span2 { grid-column: span 2; }
+  button { font: inherit; cursor: pointer; border-radius: 10px; padding: 10px 18px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { button.primary { color: #1d1b24; } }
+  button.link { border: 0; background: none; color: var(--accent); padding: 4px 0; }
+  button.small { padding: 4px 10px; font-size: .8rem; }
+  button:disabled { opacity: .55; cursor: wait; }
+  .bar { position: sticky; bottom: 0; background: linear-gradient(transparent, var(--bg) 30%); padding: 20px 0 8px;
+    display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+  .msg { border-radius: 12px; padding: 12px 16px; margin: 0 0 16px; }
+  .msg.err { background: var(--danger-soft); color: var(--danger); }
+  .msg.warn { background: var(--warn-soft); color: var(--warn); }
+  .msg.ok { background: var(--ok-soft); color: var(--ok); }
+  .msg ul { margin: 4px 0 0; padding-left: 20px; }
+  .hidden { display: none !important; }
+  /* review */
+  .doc h3 { font-size: 1rem; margin: 18px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  .doc h3:first-child { margin-top: 0; }
+  .kv { display: grid; grid-template-columns: 190px 1fr; gap: 4px 12px; }
+  @media (max-width: 620px) { .kv { grid-template-columns: 1fr; } .kv dt { margin-top: 6px; } }
+  .kv dt { color: var(--muted); font-size: .9rem; }
+  .kv dd { margin: 0; font-weight: 500; }
+  .tbl { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .875rem; }
+  th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: var(--accent-soft); font-weight: 600; }
+  .box { display: inline-block; width: 14px; height: 12px; border: 1.5px solid var(--ink); margin-right: 8px; vertical-align: -1px; }
+  .box.on { background: #e00; border-color: #e00; }
+  .sub { margin-top: 4px; padding: 14px; border-radius: 12px; background: var(--accent-soft); }
+  .checks { display: grid; gap: 8px; }
+  .checks label { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line);
+    border-radius: 10px; cursor: pointer; }
+  .checks input { width: auto; margin: 4px 0 0; }
+  .checks small { display: block; color: var(--muted); }
+  .hp { position: absolute; left: -9999px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>แจ้งจัดงานในพื้นที่ SCBX NEXT STAGE</h1>
+    <p id="subtitle">กรอกข้อมูลให้ครบแล้วกด “ตรวจทานข้อมูล” ระบบจะแสดงข้อมูลทั้งหมดให้ตรวจก่อนยืนยันส่ง</p>
+  </header>
+  <div class="steps"><span data-s="form" class="on">1. กรอกข้อมูล</span><span data-s="review">2. ตรวจทาน</span><span data-s="done">3. ส่งแล้ว</span></div>
+
+  <div id="errors" class="msg err hidden"></div>
+
+  <!-- ===================== STEP 1: FORM ===================== -->
+  <form id="form" novalidate autocomplete="on">
+    <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+
+    <section class="card">
+      <h2>ข้อมูลผู้จัดงาน</h2>
+      <div class="grid">
+        <div class="f full">ผู้เข้ารับผิดชอบจัดงานในพื้นที่ <span class="req">*</span>
+          <div class="radios" data-party="organizerType"></div>
+          <input name="organizer" placeholder="ชื่อบริษัท / นิติบุคคล หรือชื่อ-นามสกุล">
+        </div>
+        <label class="f full">อีเมลติดต่อ (สำหรับรับสำเนาใบแจ้งงาน) <span class="req">*</span>
+          <input type="email" name="contactEmail" placeholder="name@company.com">
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>ค่าประกันสถานที่</h2>
+      <div class="f">สถานะค่าประกันสถานที่ <span class="req">*</span>
+        <div class="radios" id="depositRadios"></div>
+      </div>
+      <div class="sub" id="payerBlock" style="margin-top:12px">
+        <div class="f">ผู้ชำระค่าเงินประกันสถานที่ <span class="req">*</span>
+          <span class="check" style="margin:4px 0 2px"><input type="checkbox" id="samePayer"> ชื่อเดียวกับผู้รับผิดชอบจัดงาน</span>
+          <div class="radios" data-party="payerType"></div>
+          <input name="payer" placeholder="ต้องตรงกับใบแจ้งหนี้ที่ชำระเงินเข้ามา">
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>รายละเอียดงาน</h2>
+      <div class="grid">
+        <label class="f full">ชื่องาน <span class="req">*</span><input name="eventName"></label>
+        <label class="f">สถานที่ <span class="req">*</span>
+          <select name="venueChoice" id="venueChoice"></select>
+        </label>
+        <label class="f" id="venueOtherWrap">ระบุสถานที่<input name="venueOther"></label>
+        <label class="f full">ลักษณะงาน <span class="req">*</span><input name="eventType" placeholder="เช่น พิธีเปิดงาน, งานแถลงข่าว, Workshop"></label>
+        <label class="f">วันที่จัดงาน (เริ่ม) <span class="req">*</span><input type="date" name="eventStart"></label>
+        <label class="f">ถึงวันที่ (ถ้าจัดหลายวัน)<input type="date" name="eventEnd"></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>วันและเวลาเข้าพื้นที่</h2>
+      <p class="hint">เวลาเปลี่ยนแปลงได้ตามความเหมาะสม ทีมงานจะยืนยันกับอาคารอีกครั้ง</p>
+      <div class="grid">
+        <label class="f">วัน Set up <span class="req">*</span>
+          <div class="pair"><input type="date" name="setupDate"><input type="time" name="setupTime" value="22:30"></div>
+        </label>
+        <label class="f">วันรื้อถอน <span class="req">*</span>
+          <div class="pair"><input type="date" name="teardownDate"><input type="time" name="teardownTime" value="22:30"></div>
+        </label>
+        <p class="hint full" id="autoExtra" style="margin:0"></p>
+        <label class="f">ส่งมอบพื้นที่ <span class="req">*</span>
+          <div class="pair"><input type="date" name="handoverDate"><input type="time" name="handoverTime"></div>
+          <span class="check"><input type="checkbox" id="sameHandover" checked> วันเดียวกับวัน Set up</span>
+        </label>
+        <label class="f">รับมอบพื้นที่ <span class="req">*</span>
+          <div class="pair"><input type="date" name="returnDate"><input type="time" name="returnTime"></div>
+          <span class="check"><input type="checkbox" id="sameReturn" checked> วันเดียวกับวันรื้อถอน</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>ผู้ติดต่อ</h2>
+      <div class="grid">
+        <label class="f">ชื่อผู้ประสานงาน (ผู้จัดงาน) <span class="req">*</span><input name="coordinatorName" placeholder="ชื่อ-นามสกุล"></label>
+        <label class="f">เบอร์โทรผู้ประสานงาน <span class="req">*</span><input type="tel" name="coordinatorPhone" placeholder="08x xxx xxxx"></label>
+        <div class="f full">ผู้เซ็นกำกับในการแลกบัตรเข้าทำการ <span class="req">*</span>
+          <div id="signers" style="margin-top:6px"></div>
+          <button type="button" class="link" id="addSigner">+ เพิ่มผู้เซ็นกำกับ</button>
+          <button type="button" class="link" id="copyCoord" style="margin-left:16px">ใช้ข้อมูลผู้ประสานงาน</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>อุปกรณ์ที่ต้องการยืมใช้</h2>
+      <p class="hint">ถ้าไม่ต้องการยืมอุปกรณ์ ลบรายการออกได้ทั้งหมด</p>
+      <div id="equipment"></div>
+      <button type="button" class="link" id="addEquip">+ เพิ่มอุปกรณ์</button>
+    </section>
+
+    <section class="card">
+      <h2>สิ่งอำนวยความสะดวก</h2>
+      <p class="hint">ติ๊กเฉพาะรายการที่ต้องการ</p>
+      <div class="checks">
+        <label><input type="checkbox" name="trashBin"> <span>ขอถังขยะในพื้นที่จัดกิจกรรม</span></label>
+        <label><input type="checkbox" name="stairCushions"> <span>ขอเก็บเบาะทั้งหมดบนขั้นบันได</span></label>
+        <label><input type="checkbox" name="stairTables"> <span>ขอเก็บโต๊ะเหล็กบนขั้นบันไดทั้งหมด</span></label>
+        <label><input type="checkbox" name="parking" checked> <span>ขอสแกนบัตรจอดรถให้ทีมผู้จัดงาน <span id="parkingHoursText"></span>
+          <small>สำหรับคืนติดตั้งและคืนรื้อถอนงาน</small></span></label>
+        <label><input type="checkbox" name="lightsSetup" checked> <span>ขอเปิดไฟแสงสว่างช่วงติดตั้งงาน
+          <small>ตั้งแต่เวลา Set up จนติดตั้งแล้วเสร็จ</small></span></label>
+        <label><input type="checkbox" name="lightsTeardown" checked> <span>ขอเปิดไฟแสงสว่างช่วงรื้อถอนงาน
+          <small>ตั้งแต่เวลารื้อถอนจนรื้อถอนแล้วเสร็จ</small></span></label>
+      </div>
+      <div class="grid" style="margin-top:14px">
+        <label class="f full">ความต้องการเพิ่มเติม (ถ้ามี)<textarea name="equipmentNotes" placeholder="บรรทัดละ 1 เรื่อง"></textarea></label>
+        <label class="f full">หมายเหตุ (ในรายละเอียดงาน)<input name="note"></label>
+      </div>
+    </section>
+
+    <div class="bar">
+      <span class="check" id="draftNote"></span>
+      <button type="submit" class="primary" id="toReview">ตรวจทานข้อมูล →</button>
+    </div>
+  </form>
+
+  <!-- ===================== STEP 2: REVIEW ===================== -->
+  <section id="review" class="hidden">
+    <div id="warnings" class="msg warn hidden"></div>
+    <div class="card doc" id="reviewDoc"></div>
+    <label class="check card" id="confirmWrap" style="color:var(--ink)"><input type="checkbox" id="confirmBox"> ข้าพเจ้าตรวจสอบข้อมูลทั้งหมดแล้ว ถูกต้องครบถ้วน</label>
+    <div class="bar">
+      <button type="button" id="backBtn">← กลับไปแก้ไข</button>
+      <button type="button" class="primary" id="submitBtn" disabled>ยืนยันและส่งแจ้งงาน</button>
+    </div>
+  </section>
+
+  <!-- ===================== STEP 3: DONE ===================== -->
+  <section id="done" class="hidden">
+    <div class="card">
+      <h2 id="doneTitle">ส่งข้อมูลเรียบร้อยแล้ว</h2>
+      <div id="doneBody"></div>
+    </div>
+  </section>
+</div>
+
+<template id="tplSigner">
+  <div class="item"><button type="button" class="small rm">ลบ</button>
+    <div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+      <label class="f">ชื่อ-นามสกุล<input data-k="name"></label>
+      <label class="f">เบอร์โทร<input type="tel" data-k="phone"></label>
+    </div>
+  </div>
+</template>
+<template id="tplEquip">
+  <div class="item"><button type="button" class="small rm">ลบ</button>
+    <div class="grid">
+      <label class="f span2">อุปกรณ์<select data-k="itemChoice" class="itemChoice"></select>
+        <input data-k="itemOther" class="itemOther hidden"></label>
+      <label class="f">จำนวน<input type="number" min="1" data-k="qty"></label>
+      <label class="f">หน่วย<input data-k="unit" value="ตัว"></label>
+      <label class="f span2">สถานที่ส่ง<select data-k="placeChoice" class="placeChoice"></select>
+        <input data-k="placeOther" class="placeOther hidden" placeholder="ระบุสถานที่ส่ง"></label>
+      <label class="f">ส่งวันที่<input type="date" data-k="sendDate"></label>
+      <label class="f">เวลาส่ง<input type="time" data-k="sendTime"></label>
+      <label class="f span2"></label>
+      <label class="f">เก็บวันที่<input type="date" data-k="pickDate"></label>
+      <label class="f">เวลาเก็บ<input type="time" data-k="pickTime"></label>
+    </div>
+  </div>
+</template>
+
+<script>
+var BOOT = null;
+var API_URL = "https://script.google.com/macros/s/AKfycbxE1dzGYP7f94lB6XmL-6hPArqp6QVJ3XFX8vjZYZJ8UrU20wYf06_ZEzqnX7KOJt1Z/exec"; // ตั้งค่าโดย tools/build_standalone.js เมื่อโฮสต์หน้าฟอร์มนอก script.google.com
+</script>
+<script>
+function startForm(BOOT) {
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var form = $('#form');
+  var DRAFT_KEY = 'nextstage-request-draft-v1';
+  var lastData = null;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function f(name) { return form.elements[name]; }
+  function call(fn) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    if (!API_URL) {
+      return new Promise(function (resolve, reject) {
+        google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn].apply(null, args);
+      });
+    }
+    return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ fn: fn, args: args }) })
+      .then(function (r) { return r.json(); })
+      .then(function (res) { if (res.error) throw new Error(res.error); return res.result; });
+  }
+  function showStep(s) {
+    $('#form').classList.toggle('hidden', s !== 'form');
+    $('#review').classList.toggle('hidden', s !== 'review');
+    $('#done').classList.toggle('hidden', s !== 'done');
+    $$('.steps span').forEach(function (el) { el.classList.toggle('on', el.dataset.s === s); });
+    window.scrollTo(0, 0);
+  }
+  function showErrors(list) {
+    var box = $('#errors');
+    if (!list || !list.length) { box.classList.add('hidden'); return; }
+    box.innerHTML = '<b>กรุณาตรวจสอบข้อมูล</b><ul>' + list.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>';
+    box.classList.remove('hidden');
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- static options ----------
+  $('#depositRadios').innerHTML = ['paid', 'unpaid', 'waived'].map(function (k) {
+    return '<label><input type="radio" name="depositStatus" value="' + k + '"> ' + esc(BOOT.depositLabels[k]) + '</label>';
+  }).join('');
+  $('#venueChoice').innerHTML = BOOT.venues.map(function (v) { return '<option>' + esc(v) + '</option>'; }).join('') +
+    '<option value="__other">อื่นๆ (ระบุ)</option>';
+  $$('[data-party]').forEach(function (box) {
+    box.innerHTML = Object.keys(BOOT.partyTypes).map(function (k) {
+      return '<label><input type="radio" name="' + box.dataset.party + '" value="' + k + '"> ' + esc(BOOT.partyTypes[k]) + '</label>';
+    }).join('');
+  });
+  $('#parkingHoursText').textContent = '(' + BOOT.parkingHours + ' ชม.)';
+  function choiceHtml(list, placeholder, withOther) {
+    return (placeholder ? '<option value="">' + placeholder + '</option>' : '') + list.map(function (v) {
+      return '<option>' + esc(v) + '</option>';
+    }).join('') + (withOther ? '<option value="__other">อื่นๆ (ระบุ)</option>' : '');
+  }
+  var CHOICES = {
+    item: { list: BOOT.equipmentPresets, html: choiceHtml(BOOT.equipmentPresets, '— เลือกอุปกรณ์ —', false) },
+    place: { list: BOOT.equipmentPlaces, html: choiceHtml(BOOT.equipmentPlaces, '', true) }
+  };
+  function syncVenue() { $('#venueOtherWrap').classList.toggle('hidden', f('venueChoice').value !== '__other'); }
+  f('venueChoice').addEventListener('change', syncVenue);
+
+  // ---------- repeatable lists ----------
+  function addRow(listId, tplId, values) {
+    var node = $('#' + tplId).content.firstElementChild.cloneNode(true);
+    values = Object.assign({}, values);
+    // dropdown + "อื่นๆ (ระบุ)": item / place are stored as plain text
+    Object.keys(CHOICES).forEach(function (k) {
+      var choice = $('.' + k + 'Choice', node);
+      if (!choice) return;
+      choice.innerHTML = CHOICES[k].html;
+      if (values[k]) {
+        var preset = CHOICES[k].list.indexOf(values[k]) >= 0;
+        values[k + 'Choice'] = preset ? values[k] : '__other';
+        values[k + 'Other'] = preset ? '' : values[k];
+      }
+      var sync = function () { $('.' + k + 'Other', node).classList.toggle('hidden', choice.value !== '__other'); };
+      choice.addEventListener('change', sync);
+      setTimeout(sync);
+    });
+    Object.keys(values || {}).forEach(function (k) {
+      var el = $('[data-k="' + k + '"]', node);
+      if (el && values[k] != null && values[k] !== '') el.value = values[k];
+    });
+    $('.rm', node).addEventListener('click', function () { node.remove(); saveDraft(); });
+    $('#' + listId).appendChild(node);
+    return node;
+  }
+  function readRows(listId) {
+    return $$('#' + listId + ' .item').map(function (node) {
+      var o = {};
+      $$('[data-k]', node).forEach(function (el) { o[el.dataset.k] = el.value; });
+      Object.keys(CHOICES).forEach(function (k) {
+        if (!((k + 'Choice') in o)) return;
+        o[k] = o[k + 'Choice'] === '__other' ? o[k + 'Other'] : o[k + 'Choice'];
+        delete o[k + 'Choice']; delete o[k + 'Other'];
+      });
+      return o;
+    });
+  }
+  function equipDefaults() {
+    return { place: BOOT.equipmentPlaces[0], unit: 'ตัว',
+      sendDate: f('setupDate').value, sendTime: f('setupTime').value,
+      pickDate: f('teardownDate').value, pickTime: f('teardownTime').value };
+  }
+  $('#addSigner').onclick = function () { addRow('signers', 'tplSigner'); };
+  $('#addEquip').onclick = function () { addRow('equipment', 'tplEquip', equipDefaults()); };
+  $('#copyCoord').onclick = function () {
+    var rows = $$('#signers .item');
+    var node = rows.filter(function (n) { return !$('[data-k="name"]', n).value; })[0] || addRow('signers', 'tplSigner');
+    $('[data-k="name"]', node).value = f('coordinatorName').value;
+    $('[data-k="phone"]', node).value = f('coordinatorPhone').value;
+    saveDraft();
+  };
+
+  // ---------- linked fields ----------
+  function radioVal(name) { var r = $('input[name="' + name + '"]:checked'); return r ? r.value : ''; }
+  function setRadio(name, v) { var r = $('input[name="' + name + '"][value="' + v + '"]'); if (r) r.checked = true; }
+  function syncAutoExtra() {
+    var t = f('setupTime').value, d = f('setupDate').value;
+    $('#autoExtra').textContent = t && t >= '22:00'
+      ? 'เข้า Set up ตั้งแต่ 22.00 น. — ระบบลง “วัน Set up เพิ่มเติม” เช้าวันถัดไป เวลา 06.00 น. ให้อัตโนมัติ'
+      : '';
+  }
+  function syncLinked() {
+    syncAutoExtra();
+    var waived = radioVal('depositStatus') === 'waived';
+    $('#payerBlock').classList.toggle('hidden', waived);
+    if ($('#samePayer').checked) { f('payer').value = f('organizer').value; setRadio('payerType', radioVal('organizerType')); }
+    f('payer').readOnly = $('#samePayer').checked;
+    $$('input[name="payerType"]').forEach(function (r) { r.disabled = $('#samePayer').checked; });
+    if ($('#sameHandover').checked) { f('handoverDate').value = f('setupDate').value; f('handoverTime').value = f('setupTime').value; }
+    if ($('#sameReturn').checked) { f('returnDate').value = f('teardownDate').value; f('returnTime').value = f('teardownTime').value; }
+    ['handoverDate', 'handoverTime'].forEach(function (n) { f(n).readOnly = $('#sameHandover').checked; });
+    ['returnDate', 'returnTime'].forEach(function (n) { f(n).readOnly = $('#sameReturn').checked; });
+  }
+  form.addEventListener('input', function () { syncLinked(); saveDraft(); });
+  form.addEventListener('change', function () { syncLinked(); saveDraft(); });
+  // new equipment rows follow set-up / teardown dates until edited individually
+  ['setupDate', 'setupTime', 'teardownDate', 'teardownTime'].forEach(function (n) {
+    var prev = f(n).value;
+    f(n).addEventListener('focus', function () { prev = f(n).value; });
+    f(n).addEventListener('change', function () {
+      var map = { setupDate: 'sendDate', setupTime: 'sendTime', teardownDate: 'pickDate', teardownTime: 'pickTime' };
+      $$('#equipment [data-k="' + map[n] + '"]').forEach(function (el) { if (!el.value || el.value === prev) el.value = f(n).value; });
+      prev = f(n).value;
+    });
+  });
+
+  // ---------- collect / populate ----------
+  function collect() {
+    var venue = f('venueChoice').value === '__other' ? f('venueOther').value : f('venueChoice').value;
+    return {
+      website: f('website').value,
+      organizer: f('organizer').value, organizerType: radioVal('organizerType'),
+      payer: f('payer').value, payerType: radioVal('payerType'), depositStatus: radioVal('depositStatus'),
+      contactEmail: f('contactEmail').value, eventName: f('eventName').value, venue: venue,
+      eventType: f('eventType').value, eventStart: f('eventStart').value, eventEnd: f('eventEnd').value,
+      setupDate: f('setupDate').value, setupTime: f('setupTime').value,
+      teardownDate: f('teardownDate').value, teardownTime: f('teardownTime').value,
+      handoverDate: f('handoverDate').value, handoverTime: f('handoverTime').value,
+      returnDate: f('returnDate').value, returnTime: f('returnTime').value,
+      signers: readRows('signers'),
+      coordinatorName: f('coordinatorName').value, coordinatorPhone: f('coordinatorPhone').value,
+      equipment: readRows('equipment'), equipmentNotes: f('equipmentNotes').value, note: f('note').value,
+      trashBin: f('trashBin').checked, stairCushions: f('stairCushions').checked, stairTables: f('stairTables').checked,
+      parking: f('parking').checked,
+      lightsSetup: f('lightsSetup').checked, lightsTeardown: f('lightsTeardown').checked
+    };
+  }
+  function populate(d) {
+    ['payer', 'organizer', 'contactEmail', 'eventName', 'eventType', 'eventStart', 'eventEnd', 'setupDate', 'setupTime',
+      'teardownDate', 'teardownTime', 'handoverDate', 'handoverTime', 'returnDate', 'returnTime', 'coordinatorName',
+      'coordinatorPhone', 'equipmentNotes', 'note'].forEach(function (k) {
+      if (d[k] != null) f(k).value = d[k];
+    });
+    setRadio('depositStatus', d.depositStatus);
+    setRadio('organizerType', d.organizerType);
+    setRadio('payerType', d.payerType);
+    ['trashBin', 'stairCushions', 'stairTables', 'parking', 'lightsSetup', 'lightsTeardown'].forEach(function (k) { if (k in d) f(k).checked = !!d[k]; });
+    if (d.venue) {
+      if (BOOT.venues.indexOf(d.venue) >= 0) f('venueChoice').value = d.venue;
+      else { f('venueChoice').value = '__other'; f('venueOther').value = d.venue; }
+    }
+    $('#samePayer').checked = !!d.payer && d.payer === d.organizer && d.payerType === d.organizerType;
+    $('#sameHandover').checked = d.handoverDate === d.setupDate && d.handoverTime === d.setupTime;
+    $('#sameReturn').checked = d.returnDate === d.teardownDate && d.returnTime === d.teardownTime;
+    ['signers', 'equipment'].forEach(function (id) { $('#' + id).innerHTML = ''; });
+    (d.signers || []).forEach(function (r) { addRow('signers', 'tplSigner', r); });
+    (d.equipment || []).forEach(function (r) { addRow('equipment', 'tplEquip', r); });
+    syncVenue(); syncLinked();
+  }
+
+  // ---------- draft (per-browser convenience only) ----------
+  var draftTimer;
+  function saveDraft() {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(function () {
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify(collect())); $('#draftNote').textContent = 'บันทึกร่างในเบราว์เซอร์นี้แล้ว'; } catch (e) {}
+    }, 400);
+  }
+  function loadDraft() {
+    try { var s = localStorage.getItem(DRAFT_KEY); return s ? JSON.parse(s) : null; } catch (e) { return null; }
+  }
+  function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} }
+
+  // ---------- review ----------
+  function kv(rows) {
+    return '<dl class="kv">' + rows.filter(function (r) { return r; }).map(function (r) {
+      return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1] || '–') + '</dd>';
+    }).join('') + '</dl>';
+  }
+  function renderReview(m) {
+    var boxes = ['paid', 'unpaid', 'waived'].map(function (k) {
+      return '<div><span class="box' + (m.depositStatus === k ? ' on' : '') + '"></span>' + esc(BOOT.depositLabels[k]) + '</div>';
+    }).join('') + (m.payer ? '<div style="margin:4px 0 0 22px">ผู้ชำระ: <b>' + esc(m.payer) + '</b> (' + esc(m.payerType) + ')</div>' : '');
+    var html = '<h3>ใบแจ้งงานสำหรับการจัดกิจกรรมในพื้นที่ส่วนกลาง</h3>' +
+      '<div style="margin-bottom:12px">' + boxes + '</div>' +
+      kv([['วันที่แจ้ง', m.reportDate], ['ผู้จัดงาน', m.organizer + ' (' + m.organizerType + ')'], ['ชื่องาน', m.eventName],
+        ['สถานที่', m.venue], ['ลักษณะงาน', m.eventType], ['วันที่จัดงาน', m.eventDate + ' (' + m.eventDays + ' วัน)'],
+        ['วัน Set up', m.setupDate + ' เวลา ' + m.setupTime + ' เป็นต้นไป']]
+        .concat(m.extraSetup.map(function (x) { return ['วัน Set up เพิ่มเติม', x.date + ' เวลา ' + x.time + ' เป็นต้นไป']; }))
+        .concat([['วันรื้อถอน', m.teardownDate + ' เวลา ' + m.teardownTime],
+          ['ส่งมอบพื้นที่', m.handoverDate + ' เวลา ' + m.handoverTime],
+          ['รับมอบพื้นที่', m.returnDate + ' เวลา ' + m.returnTime],
+          ['ผู้เซ็นกำกับแลกบัตร', m.signers.map(function (s) { return s.text; }).join('\n')],
+          ['ผู้ประสานงาน', m.coordinator], m.note ? ['หมายเหตุ', m.note] : null])) +
+      '<h3>ส่วนบริการ — อุปกรณ์</h3><div class="tbl"><table><thead><tr><th>อุปกรณ์</th><th>จำนวน</th><th>สถานที่ส่ง</th><th>ส่งวันที่</th><th>เวลา</th><th>เก็บวันที่</th><th>เวลา</th></tr></thead><tbody>' +
+      m.equipment.map(function (x) {
+        return '<tr><td>' + [x.item, x.qty, x.place, x.sendDate, x.sendTime, x.pickDate, x.pickTime].map(esc).join('</td><td>') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      (m.waiveEquipmentFee ? '<p><b>***(โดยขอยกเว้นค่าใช้จ่ายค่าอุปกรณ์ทั้งหมดในการจัดกิจกรรมครั้งนี้)***</b></p>' : '') +
+      (m.equipmentNotes.length ? kv([['หมายเหตุ', m.equipmentNotes.map(function (x) { return x.text; }).join('\n')]]) : '') +
+      '<h3>ห้องแลกบัตร ชั้น B1</h3>' + kv([['สแกนบัตรจอดรถ', m.parking ? m.parkingHours + ' ชม. ให้ทีมผู้จัดงานทั้งคืนติดตั้งและรื้อถอน' : 'ไม่ขอ']]) +
+      '<h3>งานระบบไฟฟ้า</h3>' + kv(m.lights ? [['ขอเปิดไฟแสงสว่าง', m.venue],
+        m.lightsSetup ? ['ติดตั้งงาน', m.setupDate + ' เวลา ' + m.setupTime + ' จนติดตั้งแล้วเสร็จ'] : null,
+        m.lightsTeardown ? ['รื้อถอนงาน', m.teardownDate + ' เวลา ' + m.teardownTime + ' จนรื้อถอนแล้วเสร็จ'] : null]
+        : [['ขอเปิดไฟแสงสว่าง', 'ไม่ขอ']]);
+    $('#reviewDoc').innerHTML = html.replace(/\n/g, '<br>');
+  }
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var btn = $('#toReview');
+    btn.disabled = true;
+    lastData = collect();
+    call('previewRequest', lastData).then(function (res) {
+      btn.disabled = false;
+      if (res.errors.length) return showErrors(res.errors);
+      showErrors(null);
+      var w = $('#warnings');
+      w.innerHTML = res.warnings.length ? '<b>โปรดตรวจสอบ</b><ul>' + res.warnings.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '';
+      w.classList.toggle('hidden', !res.warnings.length);
+      renderReview(res.model);
+      $('#confirmBox').checked = false;
+      $('#submitBtn').disabled = true;
+      showStep('review');
+    }).catch(function (e) { btn.disabled = false; showErrors([e.message || String(e)]); });
+  });
+  $('#confirmBox').addEventListener('change', function () { $('#submitBtn').disabled = !this.checked; });
+  $('#backBtn').onclick = function () { showStep('form'); };
+  $('#submitBtn').onclick = function () {
+    var btn = this;
+    btn.disabled = true; btn.textContent = 'กำลังส่ง…';
+    call('submitRequest', lastData).then(function (res) {
+      btn.textContent = 'ยืนยันและส่งแจ้งงาน';
+      if (!res.ok) { btn.disabled = false; showStep('form'); return showErrors(res.errors); }
+      clearDraft();
+      $('#doneBody').innerHTML = '<p>เลขที่คำขอ <b>' + esc(res.id) + '</b></p><p>ทีมงาน SCBX NEXT STAGE ได้รับข้อมูลแล้ว และได้ส่งสำเนาใบแจ้งงานไปที่ <b>' +
+        esc(lastData.contactEmail) + '</b> หากต้องการแก้ไขข้อมูล กรุณาตอบกลับอีเมลดังกล่าว</p>';
+      showStep('done');
+    }).catch(function (e) { btn.disabled = false; btn.textContent = 'ยืนยันและส่งแจ้งงาน'; showErrors([e.message || String(e)]); });
+  };
+
+  var draft = loadDraft();
+  if (draft) { populate(draft); $('#draftNote').textContent = 'กู้คืนข้อมูลร่างที่กรอกค้างไว้แล้ว'; }
+  else { $('#samePayer').checked = true; addRow('signers', 'tplSigner'); addRow('equipment', 'tplEquip', equipDefaults()); syncVenue(); syncLinked(); }
+}
+
+if (BOOT) startForm(BOOT);
+else fetch(API_URL + '?api=boot').then(function (r) { return r.json(); }).then(startForm).catch(function () {
+  document.getElementById('errors').textContent = 'โหลดฟอร์มไม่สำเร็จ กรุณารีเฟรชหน้านี้อีกครั้ง';
+  document.getElementById('errors').classList.remove('hidden');
+});
+</script>
+</body>
+</html>
