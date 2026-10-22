@@ -131,6 +131,10 @@
           <div class="radios" data-party="payerType"></div>
           <input name="payer" placeholder="ต้องตรงกับใบแจ้งหนี้ที่ชำระเงินเข้ามา">
         </div>
+        <label class="f hidden" id="payDueWrap" style="margin-top:12px">วันที่ผู้จัดงานจะชำระค่าประกันสถานที่ <span class="req">*</span>
+          <input type="date" name="payDueDate" style="max-width:260px">
+          <span class="check" id="payDueHint">ต้องไม่น้อยกว่า 5 วันทำการ ก่อนวันเข้าพื้นที่ Set up</span>
+        </label>
       </div>
     </section>
 
@@ -158,8 +162,6 @@
         <label class="f">วันรื้อถอน <span class="req">*</span>
           <div class="pair"><input type="date" name="teardownDate"><input type="time" name="teardownTime" value="22:30"></div>
         </label>
-        <label class="check full" style="color:var(--ink)"><input type="checkbox" name="extraMorningSetup">
-          <span>กรุณาติ๊ก กรณีต้องการ Set up เพิ่มเติม เช้าวันถัดไป ตั้งแต่เวลา 06.00 น. <span id="morningDate"></span></span></label>
         <label class="f">ส่งมอบพื้นที่ <span class="req">*</span>
           <div class="pair"><input type="date" name="handoverDate"><input type="time" name="handoverTime"></div>
           <span class="check"><input type="checkbox" id="sameHandover" checked> วันเดียวกับวัน Set up</span>
@@ -387,16 +389,22 @@ function startForm(BOOT) {
   // ---------- linked fields ----------
   function radioVal(name) { var r = $('input[name="' + name + '"]:checked'); return r ? r.value : ''; }
   function setRadio(name, v) { var r = $('input[name="' + name + '"][value="' + v + '"]'); if (r) r.checked = true; }
-  function syncAutoExtra() {
-    var d = f('setupDate').value, label = '';
-    if (d) {
-      var t = new Date(d + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + 1);
-      label = '(วันที่ ' + t.getUTCDate() + '/' + (t.getUTCMonth() + 1) + '/' + (t.getUTCFullYear() + 543) + ')';
+  // latest deposit payment date = 5 business days (Mon–Fri) before set-up; server re-checks the same rule
+  function syncPayDue() {
+    var unpaid = radioVal('depositStatus') === 'unpaid', setup = f('setupDate').value;
+    $('#payDueWrap').classList.toggle('hidden', !unpaid);
+    var hint = 'ต้องไม่น้อยกว่า 5 วันทำการ ก่อนวันเข้าพื้นที่ Set up';
+    f('payDueDate').removeAttribute('max');
+    if (setup) {
+      var t = new Date(setup + 'T00:00:00Z'), left = 5;
+      while (left > 0) { t.setUTCDate(t.getUTCDate() - 1); if (t.getUTCDay() !== 0 && t.getUTCDay() !== 6) left--; }
+      f('payDueDate').max = t.toISOString().slice(0, 10);
+      hint += ' — ชำระได้ภายในวันที่ ' + t.getUTCDate() + '/' + (t.getUTCMonth() + 1) + '/' + (t.getUTCFullYear() + 543);
     }
-    $('#morningDate').textContent = label;
+    $('#payDueHint').textContent = hint;
   }
   function syncLinked() {
-    syncAutoExtra();
+    syncPayDue();
     var waived = radioVal('depositStatus') === 'waived';
     $('#payerBlock').classList.toggle('hidden', waived);
     if ($('#samePayer').checked) { f('payer').value = f('organizer').value; setRadio('payerType', radioVal('organizerType')); }
@@ -427,6 +435,7 @@ function startForm(BOOT) {
       website: f('website').value,
       organizer: f('organizer').value, organizerType: radioVal('organizerType'),
       payer: f('payer').value, payerType: radioVal('payerType'), depositStatus: radioVal('depositStatus'),
+      payDueDate: f('payDueDate').value,
       contactEmail: f('contactEmail').value, eventName: f('eventName').value, venue: venue,
       eventType: f('eventType').value, eventStart: f('eventStart').value, eventEnd: f('eventEnd').value,
       setupDate: f('setupDate').value, setupTime: f('setupTime').value,
@@ -436,7 +445,7 @@ function startForm(BOOT) {
       signers: readRows('signers'),
       coordinatorName: f('coordinatorName').value, coordinatorPhone: f('coordinatorPhone').value,
       equipment: readRows('equipment'), equipmentNotes: f('equipmentNotes').value, note: f('note').value,
-      extraMorningSetup: f('extraMorningSetup').checked, trashBin: f('trashBin').checked, stairCushions: f('stairCushions').checked, stairTables: f('stairTables').checked,
+      trashBin: f('trashBin').checked, stairCushions: f('stairCushions').checked, stairTables: f('stairTables').checked,
       parking: f('parking').checked,
       lightsSetup: f('lightsSetup').checked, lightsTeardown: f('lightsTeardown').checked
     };
@@ -444,13 +453,13 @@ function startForm(BOOT) {
   function populate(d) {
     ['payer', 'organizer', 'contactEmail', 'eventName', 'eventType', 'eventStart', 'eventEnd', 'setupDate', 'setupTime',
       'teardownDate', 'teardownTime', 'handoverDate', 'handoverTime', 'returnDate', 'returnTime', 'coordinatorName',
-      'coordinatorPhone', 'equipmentNotes', 'note'].forEach(function (k) {
+      'coordinatorPhone', 'equipmentNotes', 'note', 'payDueDate'].forEach(function (k) {
       if (d[k] != null) f(k).value = d[k];
     });
     setRadio('depositStatus', d.depositStatus);
     setRadio('organizerType', d.organizerType);
     setRadio('payerType', d.payerType);
-    ['extraMorningSetup', 'trashBin', 'stairCushions', 'stairTables', 'parking', 'lightsSetup', 'lightsTeardown'].forEach(function (k) { if (k in d) f(k).checked = !!d[k]; });
+    ['trashBin', 'stairCushions', 'stairTables', 'parking', 'lightsSetup', 'lightsTeardown'].forEach(function (k) { if (k in d) f(k).checked = !!d[k]; });
     if (d.venue) {
       if (BOOT.venues.indexOf(d.venue) >= 0) f('venueChoice').value = d.venue;
       else { f('venueChoice').value = '__other'; f('venueOther').value = d.venue; }
@@ -486,7 +495,8 @@ function startForm(BOOT) {
   function renderReview(m) {
     var boxes = ['paid', 'unpaid', 'waived'].map(function (k) {
       return '<div><span class="box' + (m.depositStatus === k ? ' on' : '') + '"></span>' + esc(BOOT.depositLabels[k]) + '</div>';
-    }).join('') + (m.payer ? '<div style="margin:4px 0 0 22px">ผู้ชำระ: <b>' + esc(m.payer) + '</b> (' + esc(m.payerType) + ')</div>' : '');
+    }).join('') + (m.payer ? '<div style="margin:4px 0 0 22px">ผู้ชำระ: <b>' + esc(m.payer) + '</b> (' + esc(m.payerType) + ')</div>' : '') +
+      (m.payDueDate ? '<div style="margin:2px 0 0 22px">กำหนดชำระค่าประกัน: <b>ภายในวันที่ ' + esc(m.payDueDate) + '</b></div>' : '');
     var html = '<h3>ใบแจ้งงานสำหรับการจัดกิจกรรมในพื้นที่ส่วนกลาง</h3>' +
       '<div style="margin-bottom:12px">' + boxes + '</div>' +
       kv([['วันที่แจ้ง', m.reportDate], ['ผู้จัดงาน', m.organizer + ' (' + m.organizerType + ')'], ['ชื่องาน', m.eventName],
