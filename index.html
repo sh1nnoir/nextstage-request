@@ -133,7 +133,7 @@
         </div>
         <label class="f hidden" id="payDueWrap" style="margin-top:12px">วันที่ผู้จัดงานจะชำระค่าประกันสถานที่ <span class="req">*</span>
           <input type="date" name="payDueDate" style="max-width:260px">
-          <span class="check" id="payDueHint">ต้องไม่น้อยกว่า 5 วันทำการ ก่อนวันเข้าพื้นที่ Set up</span>
+          <span class="check" id="payDueHint"></span>
         </label>
       </div>
     </section>
@@ -389,15 +389,21 @@ function startForm(BOOT) {
   // ---------- linked fields ----------
   function radioVal(name) { var r = $('input[name="' + name + '"]:checked'); return r ? r.value : ''; }
   function setRadio(name, v) { var r = $('input[name="' + name + '"][value="' + v + '"]'); if (r) r.checked = true; }
-  // latest deposit payment date = 5 business days (Mon–Fri) before set-up; server re-checks the same rule
+  // latest deposit payment date = N business days before set-up, skipping weekends and Thai public holidays
+  // (BOOT.holidays from the server, which re-checks the same rule on submit)
   function syncPayDue() {
     var unpaid = radioVal('depositStatus') === 'unpaid', setup = f('setupDate').value;
     $('#payDueWrap').classList.toggle('hidden', !unpaid);
-    var hint = 'ต้องไม่น้อยกว่า 5 วันทำการ ก่อนวันเข้าพื้นที่ Set up';
+    var n = BOOT.payBeforeBusinessDays || 5, off = {};
+    (BOOT.holidays || []).forEach(function (h) { off[h] = true; });
+    var hint = 'ต้องไม่น้อยกว่า ' + n + ' วันทำการ ก่อนวันเข้าพื้นที่ Set up (ไม่นับเสาร์-อาทิตย์และวันหยุดนักขัตฤกษ์)';
     f('payDueDate').removeAttribute('max');
     if (setup) {
-      var t = new Date(setup + 'T00:00:00Z'), left = 5;
-      while (left > 0) { t.setUTCDate(t.getUTCDate() - 1); if (t.getUTCDay() !== 0 && t.getUTCDay() !== 6) left--; }
+      var t = new Date(setup + 'T00:00:00Z'), left = n;
+      while (left > 0) {
+        t.setUTCDate(t.getUTCDate() - 1);
+        if (t.getUTCDay() !== 0 && t.getUTCDay() !== 6 && !off[t.toISOString().slice(0, 10)]) left--;
+      }
       f('payDueDate').max = t.toISOString().slice(0, 10);
       hint += ' — ชำระได้ภายในวันที่ ' + t.getUTCDate() + '/' + (t.getUTCMonth() + 1) + '/' + (t.getUTCFullYear() + 543);
     }
